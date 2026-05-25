@@ -1,0 +1,87 @@
+import {
+  Activity,
+  Apple,
+  Ban,
+  BookOpen,
+  Brain,
+  Briefcase,
+  Crown,
+  Droplets,
+  Dumbbell,
+  Eye,
+  Flame,
+  Flower2,
+  Footprints,
+  GraduationCap,
+  HeartPulse,
+  Moon,
+  Move,
+  Newspaper,
+  NotebookPen,
+  Pill,
+  Puzzle,
+  Salad,
+  Scale,
+  Scissors,
+  Shield,
+  Sparkles,
+  Spade,
+  Star,
+  Accessibility,
+  Swords,
+  Target,
+  Trophy,
+  User,
+  Wind,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  dumbbell: Dumbbell,
+  brain: Brain,
+  eye: Eye,
+  "heart-pulse": HeartPulse,
+  footprints: Footprints,
+  stretch: Accessibility,
+  trophy: Trophy,
+  swords: Swords,
+  move: Move,
+  "flower-2": Flower2,
+  puzzle: Puzzle,
+  briefcase: Briefcase,
+  "book-open": BookOpen,
+  "graduation-cap": GraduationCap,
+  spade: Spade,
+  newspaper: Newspaper,
+  "notebook-pen": NotebookPen,
+  apple: Apple,
+  scale: Scale,
+  pill: Pill,
+  salad: Salad,
+  droplets: Droplets,
+  ban: Ban,
+  moon: Moon,
+  sparkles: Sparkles,
+  scissors: Scissors,
+  user: User,
+  flame: Flame,
+  shield: Shield,
+  wind: Wind,
+  target: Target,
+  zap: Zap,
+  crown: Crown,
+  star: Star,
+  activity: Activity,
+};
+
+interface IconResolverProps {
+  name: string | null | undefined;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function IconResolver({ name, className, style }: IconResolverProps) {
+  const Icon = (name && ICON_MAP[name]) || Zap;
+  return <Icon className={className} style={style} />;
+}
