@@ -11,6 +11,13 @@ export type RankTier =
 export type QuestType = "daily" | "weekly" | "main" | "side" | "dungeon";
 export type QuestStatus = "active" | "completed" | "failed" | "expired";
 
+export type SkillType =
+  | "workout_root"
+  | "workout_branch"
+  | "muscle_group"
+  | "mental_skill"
+  | "general";
+
 export interface Profile {
   id: string;
   display_name: string | null;
@@ -49,6 +56,50 @@ export interface Category {
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
+}
+
+export interface Skill {
+  id: string;
+  user_id: string | null;
+  parent_id: string | null;
+  slug: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  color: string;
+  skill_type: SkillType;
+  base_xp: number;
+  level: number;
+  total_xp: number;
+  current_streak: number;
+  longest_streak: number;
+  rank: RankTier;
+  is_system: boolean;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Sport {
+  id: string;
+  user_id: string | null;
+  slug: string;
+  name: string;
+  icon: string | null;
+  color: string;
+  base_xp: number;
+  level: number;
+  total_xp: number;
+  current_streak: number;
+  longest_streak: number;
+  sessions_count: number;
+  rank: RankTier;
+  is_system: boolean;
+  is_active: boolean;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  played_today?: boolean;
 }
 
 export interface Habit {
@@ -127,6 +178,20 @@ export interface Exercise {
   updated_at: string;
 }
 
+export interface WorkoutSession {
+  id: string;
+  user_id: string;
+  session_type: string;
+  branch_slug: string | null;
+  started_at: string;
+  ended_at: string | null;
+  total_xp: number;
+  exercise_count: number;
+  notes: string | null;
+  is_active: boolean;
+  metadata: Record<string, unknown>;
+}
+
 export interface Quest {
   id: string;
   user_id: string | null;
@@ -181,6 +246,49 @@ export interface DailyCompletion {
   created_at: string;
 }
 
+export interface WorkoutLogEntry {
+  id: string;
+  exercise_id: string;
+  exercise_name: string;
+  session_id: string | null;
+  skill_slug: string | null;
+  logged_at: string;
+  weight: number | null;
+  reps: number | null;
+  sets: number | null;
+  xp_earned: number;
+  is_pr: boolean;
+}
+
+export interface DashboardMeta {
+  achievements?: {
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+    rarity: string;
+    unlocked: boolean;
+    unlocked_at: string | null;
+  }[];
+  readiness?: {
+    date: string;
+    sleep: number;
+    energy: number;
+    soreness: number;
+    score: number;
+    recommendation: string;
+  } | null;
+  dungeon?: {
+    quest_id: string;
+    boss_hp: number;
+    boss_hp_max: number;
+    ends_at: string;
+    title: string;
+  } | null;
+  shadowCoins?: number;
+  adaptive?: { habitId: string; habitName: string; type: string; message: string }[];
+}
+
 export interface DashboardStats {
   profile: Profile;
   categories: Category[];
@@ -189,4 +297,11 @@ export interface DashboardStats {
   quests: Quest[];
   dailyCompletion: DailyCompletion | null;
   recentXpEvents: XpEvent[];
+  skills: Skill[];
+  sports: Sport[];
+  exercises: Exercise[];
+  workoutSessions: WorkoutSession[];
+  workoutLogs: WorkoutLogEntry[];
+  todayXpEarned?: number;
+  meta?: DashboardMeta;
 }

@@ -37,6 +37,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# local user data (private)
+data/users.json
+data/sessions.json
+
 # python legacy
 legacy-streamlit/.venv
 legacy-streamlit/__pycache__

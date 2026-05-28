@@ -2,15 +2,12 @@
 
 import { MobileNav } from "@/components/mobile/MobileNav";
 import { ParticleField } from "@/components/effects/ParticleField";
-import { useDashboard } from "@/hooks/useDashboard";
 
 export default function MobileLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  useDashboard();
-
   return (
     <div className="min-h-dvh pb-20 relative overflow-x-hidden">
       <ParticleField count={20} />

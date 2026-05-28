@@ -15,6 +15,7 @@ export interface XpCalculationInput {
   consistencyScore?: number;
   momentumScore?: number;
   isPerfectDay?: boolean;
+  isPerfectWeek?: boolean;
   isCategoryComplete?: boolean;
 }
 
@@ -70,6 +71,7 @@ export function calculateXp(input: XpCalculationInput): XpCalculationResult {
 
   let bonus = 1;
   if (input.isPerfectDay) bonus *= 1.5;
+  if (input.isPerfectWeek) bonus *= 1.35;
   if (input.isCategoryComplete) bonus *= 1.25;
 
   const multipliers: XpMultipliers = {

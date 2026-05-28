@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jarvis Widget</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #020617; color: #a5f3fc; margin: 0; padding: 12px; }
+    .pct { font-size: 2rem; font-weight: bold; color: #22d3ee; }
+    button { margin-top: 8px; width: 100%; padding: 10px; background: #0891b2; border: none; border-radius: 8px; color: #0f172a; font-weight: 600; cursor: pointer; }
+    a { color: #67e8f9; font-size: 12px; display: block; margin-top: 8px; text-align: center; }
+  </style>
+</head>
+<body>
+  <p style="font-size:10px;opacity:0.5;margin:0 0 4px">JARVIS PROTOCOL</p>
+  <div class="pct" id="pct">—%</div>
+  <p id="sub" style="font-size:12px;opacity:0.7;margin:4px 0">Loading…</p>
+  <button id="go" type="button" disabled>Open Jarvis</button>
+  <a href="/">Full app →</a>
+  <script>
+    async function load() {
+      try {
+        const r = await fetch('/api/widgets/snapshot', { credentials: 'include' });
+        if (!r.ok) throw new Error('auth');
+        const d = await r.json();
+        document.getElementById('pct').textContent = d.completionPercent + '%';
+        document.getElementById('sub').textContent =
+          (d.priorityHabit ? d.priorityHabit.name : 'Daily protocol') +
+          ' · Lv.' + d.playerLevel + ' ' + d.rank;
+        const btn = document.getElementById('go');
+        btn.disabled = false;
+        btn.textContent = d.priorityHabit ? 'Complete: ' + d.priorityHabit.name : 'Open Jarvis';
+        btn.onclick = () => {
+          if (d.priorityHabit) {
+            fetch('/api/habits/complete', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ habitId: d.priorityHabit.id, completed: true }),
+            }).then(() => load());
+          } else {
+            location.href = '/app/mobile/dashboard';
+          }
+        };
+      } catch {
+        document.getElementById('sub').textContent = 'Log in at jarvis first';
+      }
+    }
+    load();
+    setInterval(load, 60000);
+  </script>
+</body>
+</html>

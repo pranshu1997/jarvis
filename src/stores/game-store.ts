@@ -14,13 +14,18 @@ interface GameState {
   platform: "desktop" | "mobile";
   xpAnimations: XpAnimation[];
   lastLevelUp: number | null;
-  setStats: (stats: DashboardStats) => void;
+  lastRankUp: string | null;
+  undoUntil: number | null;
+  setStats: (stats: DashboardStats | null) => void;
   setLoading: (loading: boolean) => void;
   setPlatform: (platform: "desktop" | "mobile") => void;
   addXpAnimation: (animation: XpAnimation) => void;
   removeXpAnimation: (id: string) => void;
   triggerLevelUp: (level: number) => void;
   clearLevelUp: () => void;
+  triggerRankUp: (rank: string) => void;
+  clearRankUp: () => void;
+  setUndoUntil: (until: number | null) => void;
   toggleHabit: (habitId: string) => void;
   toggleSupplement: (supplementId: string) => void;
 }
@@ -31,6 +36,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   platform: "desktop",
   xpAnimations: [],
   lastLevelUp: null,
+  lastRankUp: null,
+  undoUntil: null,
 
   setStats: (stats) => set({ stats, isLoading: false }),
   setLoading: (isLoading) => set({ isLoading }),
@@ -43,6 +50,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     })),
   triggerLevelUp: (level) => set({ lastLevelUp: level }),
   clearLevelUp: () => set({ lastLevelUp: null }),
+  triggerRankUp: (rank: string) => set({ lastRankUp: rank }),
+  clearRankUp: () => set({ lastRankUp: null }),
+  setUndoUntil: (undoUntil: number | null) => set({ undoUntil }),
 
   toggleHabit: (habitId) => {
     const { stats } = get();

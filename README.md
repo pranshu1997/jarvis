@@ -4,6 +4,10 @@ A private, full-stack personal productivity RPG inspired by Solo Leveling and Ir
 
 > **Not a SaaS product.** This is a single-user private system.
 
+## Spec coverage
+
+See **[docs/SPEC_STATUS.md](docs/SPEC_STATUS.md)** for a line-by-line comparison with the original build spec.
+
 ## Features
 
 - **Dual experience**: Tactical desktop command center + mobile RPG HUD (not responsive clones)
@@ -11,46 +15,51 @@ A private, full-stack personal productivity RPG inspired by Solo Leveling and Ir
 - **XP engine**: Multiplicative progression (streak, combo, consistency, momentum, perfect-day bonuses)
 - **Solo Leveling ranks**: E → D → C → B → A → S → National → Monarch
 - **PWA**: Installable on iOS/Android with offline support
-- **Auth**: Google OAuth via Supabase + Guest demo mode
+- **Local auth**: Username/password profiles, Touch ID / Face ID (WebAuthn), auto-logout on quit
+- **Cloud auth** (optional): Google OAuth via Supabase
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
 | Frontend | Next.js 15, TypeScript, TailwindCSS, ShadCN-style UI, Framer Motion, Zustand, Recharts |
-| Backend | Supabase (PostgreSQL + Auth) |
+| Backend | Local JSON store (default) or Supabase (PostgreSQL + Auth) |
 | Deploy | Vercel |
 
-## Quick Start (Local)
+## Quick Start (Local — Default)
 
-### 1. Clone & install
+No cloud setup required. Profiles and game progress save to `data/users.json`.
+
+### 1. Launch (macOS)
+
+**Double-click** `Start Jarvis.command` in Finder. Your browser opens automatically. Keep the Terminal window open while you use the app.
+
+First launch runs `npm install` if needed. Requires [Node.js](https://nodejs.org/).
+
+### 2. Or run from terminal
 
 ```bash
-git clone https://github.com/pranshu-bansal/jarvis.git
+git clone https://github.com/pranshu1997/jarvis.git
 cd jarvis
 npm install
-```
-
-### 2. Environment
-
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local` with your Supabase credentials. **Guest mode works without Supabase** using built-in demo data.
-
-### 3. Run
-
-```bash
+cp .env.example .env.local   # optional; local mode is default
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
 
-- **Guest Mode** — instant demo with seeded habits/quests
-- **Google Login** — requires Supabase setup below
+### 3. Auth
 
-## Supabase Setup
+| Action | How |
+|--------|-----|
+| **Create profile** | "New Profile" → username + password |
+| **Login** | Username + password |
+| **Touch ID / Face ID** | Enter username → biometric button (after enabling in Settings) |
+| **Log out** | Sidebar, or **automatically when you quit the app/tab** |
+
+Sessions use browser session cookies (not persistent across restarts). Quitting the app clears your login; your XP and habits remain on disk.
+
+## Supabase Setup (Optional Cloud Mode)
 
 ### 1. Create project
 

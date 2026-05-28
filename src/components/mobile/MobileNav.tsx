@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   BarChart3,
+  Dumbbell,
   LayoutDashboard,
   Scroll,
   Shield,
@@ -16,6 +17,7 @@ const TABS = [
   { href: "/app/mobile/dashboard", label: "HUD", icon: LayoutDashboard },
   { href: "/app/mobile/quests", label: "Quests", icon: Scroll },
   { href: "/app/mobile/log", label: "Log", icon: Swords },
+  { href: "/app/mobile/workout", label: "Train", icon: Dumbbell },
   { href: "/app/mobile/stats", label: "Stats", icon: Shield },
   { href: "/app/mobile/profile", label: "Profile", icon: BarChart3 },
 ];

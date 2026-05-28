@@ -1,0 +1,27 @@
+---
+description: Load and update shared project memory in context/ (same as CLAUDE.md)
+alwaysApply: true
+---
+
+# Project context (shared with Claude Code)
+
+This repo uses `context/` as persistent memory across Cursor and Claude Code CLI. Do not maintain a separate Cursor-only history.
+
+## On every task start
+
+1. Read `context/history.md`, `context/decisions.md`, `context/gotchas.md`, `context/todo.md`
+2. Read `CONVENTIONS.md` before writing code
+3. If `context/` is missing, create the four files using the templates in `claude_config/agents/context-manager.md` (BOOTSTRAP section)
+
+## On every task completion
+
+1. Append a brief entry to `context/history.md` (date, task, what changed, files touched)
+2. Append to `context/decisions.md` or `context/gotchas.md` when applicable
+3. Update `context/todo.md` (done / in-progress / blocked)
+4. Archive `context/history.md` entries older than 30 days to `context/archive/history-YYYY-MM.md`
+
+Do not use `MEMORY.md` or `STATUS.md` (deprecated). Live tasks: `context/todo.md`. Session log: `context/history.md`.
+
+## Full conventions
+
+Also follow `CLAUDE.md` in the project root (agent routing, Definition of Done, git workflow). At session start in Cursor, invoke **session-start**. At session end, invoke **update-project-context**. Claude Code agents live in `.claude/agents/`; Cursor does not load those files automatically, but the same workflow applies.

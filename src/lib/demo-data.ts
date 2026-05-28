@@ -126,7 +126,11 @@ function habit(
   icon: string,
   baseXp: number,
   streak: number,
-  completed = false
+  completed = false,
+  targetValue?: number,
+  unit?: string,
+  currentValue?: number,
+  preferredPeriod?: string
 ): Habit {
   return {
     id: `habit-${slug}`,
@@ -142,11 +146,15 @@ function habit(
     total_xp: baseXp * streak * 5,
     current_streak: streak,
     longest_streak: streak + 5,
-    target_value: null,
-    unit: null,
+    target_value: targetValue ?? null,
+    unit: unit ?? null,
     is_system: true,
     is_active: true,
-    metadata: { category_slug: categorySlug },
+    metadata: {
+      category_slug: categorySlug,
+      ...(currentValue != null ? { current_value: currentValue } : {}),
+      ...(preferredPeriod ? { preferred_period: preferredPeriod } : {}),
+    },
     created_at: "",
     updated_at: "",
     completed_today: completed,
@@ -154,7 +162,7 @@ function habit(
 }
 
 export const DEMO_HABITS: Habit[] = [
-  habit("steps_5k", "Steps 5k", "physical", "footprints", 15, 5, true),
+  habit("steps_5k", "Steps 5k", "physical", "footprints", 15, 5, false, 5000, "steps", 3200),
   habit("workout_habit", "Workout", "physical", "dumbbell", 25, 5, false),
   habit("flexibility", "Flexibility", "physical", "stretch", 15, 2, true),
   habit("sports_habit", "Sports", "physical", "trophy", 20, 0, false),
@@ -171,9 +179,9 @@ export const DEMO_HABITS: Habit[] = [
   habit("diet_tracking", "Diet Tracking", "awareness", "apple", 15, 5, false),
   habit("weight_tracking", "Weight Tracking", "awareness", "scale", 10, 2, true),
   habit("follow_diet", "Follow Diet", "vitality", "salad", 20, 8, true),
-  habit("water_intake", "Water Intake", "vitality", "droplets", 10, 15, true),
+  habit("water_intake", "Water Intake", "vitality", "droplets", 10, 15, false, 8, "glasses", 5),
   habit("dont_smoke", "Don't Smoke", "vitality", "ban", 25, 30, true),
-  habit("sleep", "Sleep", "vitality", "moon", 20, 7, true),
+  habit("sleep", "Sleep", "vitality", "moon", 20, 7, false, 7, "hours", 6),
   habit("skincare", "Skincare", "vitality", "sparkles", 10, 5, false),
   habit("haircare", "Haircare", "vitality", "scissors", 10, 4, true),
   habit("beardcare", "Beardcare", "vitality", "user", 10, 3, false),
@@ -361,7 +369,8 @@ export const DEMO_QUESTS: Quest[] = [
     description: "4 hours of focused work in one session",
     quest_type: "dungeon",
     status: "active",
-    target_count: 1,
+    target_count: 8,
+    metadata: { categories: ["physical", "mental", "awareness", "vitality"] },
     current_count: 0,
     xp_reward: 300,
     rank_required: null,
@@ -369,7 +378,6 @@ export const DEMO_QUESTS: Quest[] = [
     is_system: true,
     expires_at: null,
     completed_at: null,
-    metadata: {},
     created_at: "",
     updated_at: "",
   },
@@ -426,7 +434,20 @@ export const DEMO_XP_EVENTS: XpEvent[] = [
   },
 ];
 
+import {
+  buildSeedSkills,
+  buildSeedSports,
+  buildSeedExercises,
+} from "@/lib/seed-workout-system";
+import { rollupSkillTree } from "@/lib/workout-progression";
+
 export function getDemoDashboard() {
+  const remap = (id: string) => id;
+  const skills = buildSeedSkills(remap);
+  const sports = buildSeedSports(remap);
+  const exercises = buildSeedExercises(remap, skills);
+  rollupSkillTree(skills);
+
   return {
     profile: DEMO_PROFILE,
     categories: DEMO_CATEGORIES,
@@ -435,5 +456,11 @@ export function getDemoDashboard() {
     quests: DEMO_QUESTS,
     dailyCompletion: DEMO_DAILY,
     recentXpEvents: DEMO_XP_EVENTS,
+    skills,
+    sports,
+    exercises,
+    workoutSessions: [],
+    workoutLogs: [],
+    todayXpEarned: DEMO_DAILY.total_xp,
   };
 }

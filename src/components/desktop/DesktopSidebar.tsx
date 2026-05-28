@@ -7,15 +7,20 @@ import {
   BarChart3,
   Dumbbell,
   LayoutDashboard,
+  CalendarDays,
   LineChart,
   Scroll,
   Settings,
   Shield,
   Swords,
   User,
+  Trophy,
+  Coins,
+  Bot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RankBadge } from "@/components/shared/RankBadge";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 import { useGameStore } from "@/stores/game-store";
 import { xpProgressInLevel } from "@/lib/xp-engine";
 import { XpBar } from "@/components/effects/XpBar";
@@ -27,6 +32,10 @@ const NAV = [
   { href: "/app/desktop/workout", label: "Workout", icon: Dumbbell },
   { href: "/app/desktop/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/app/desktop/timeline", label: "Timeline", icon: LineChart },
+  { href: "/app/desktop/weekly", label: "Weekly Review", icon: CalendarDays },
+  { href: "/app/desktop/trophy", label: "Trophy Room", icon: Trophy },
+  { href: "/app/desktop/shop", label: "Shadow Shop", icon: Coins },
+  { href: "/app/desktop/coach", label: "JARVIS Coach", icon: Bot },
   { href: "/app/desktop/profile", label: "Profile", icon: User },
   { href: "/app/desktop/settings", label: "Settings", icon: Settings },
 ];
@@ -112,14 +121,15 @@ export function DesktopSidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-cyan-500/10">
+      <div className="p-4 border-t border-cyan-500/10 space-y-2">
         <Link
           href="/app/mobile/dashboard"
-          className="flex items-center gap-2 text-xs text-cyan-500/50 hover:text-cyan-400"
+          className="flex items-center gap-2 text-xs text-cyan-500/50 hover:text-cyan-400 px-3"
         >
           <Swords className="w-3 h-3" />
           Switch to Mobile HUD
         </Link>
+        <LogoutButton />
       </div>
     </aside>
   );
