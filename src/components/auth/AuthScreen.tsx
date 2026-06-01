@@ -35,6 +35,24 @@ export function AuthScreen() {
   }, []);
 
   useEffect(() => {
+    if (sessionStorage.getItem("jarvis_touchid_attempted") === "1") return;
+    sessionStorage.setItem("jarvis_touchid_attempted", "1");
+
+    void fetch("/api/auth/touch-id", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: "pranshu" }),
+    })
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.user) persistLogin(data.user);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (!username.trim() || tab !== "login") {
       setHasBiometric(false);
       return;
@@ -55,7 +73,7 @@ export function AuthScreen() {
     if (user.username) {
       localStorage.setItem(LAST_USERNAME_KEY, user.username);
     }
-    router.push("/app");
+    window.location.assign("/app");
   };
 
   const handleRegister = async (e: React.FormEvent) => {

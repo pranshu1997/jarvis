@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ParticleField } from "@/components/effects/ParticleField";
@@ -11,17 +11,23 @@ import { Shield, Sparkles } from "lucide-react";
 
 export default function LandingPage() {
   const router = useRouter();
+  const [ssoError, setSsoError] = useState("");
+
+  useEffect(() => {
+    const err = new URLSearchParams(window.location.search).get("sso_error");
+    if (err?.trim()) setSsoError(err.trim());
+  }, []);
 
   useEffect(() => {
     fetch("/api/auth/session", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
         if (data.authenticated && data.localMode) {
-          router.replace("/app");
+          window.location.assign("/app");
         }
       })
       .catch(() => {});
-  }, [router]);
+  }, []);
 
   return (
     <div className="relative min-h-dvh flex flex-col items-center justify-center overflow-hidden hud-grid py-12">
@@ -33,6 +39,12 @@ export default function LandingPage() {
         transition={{ duration: 0.8 }}
         className="relative z-10 w-full px-6 max-w-lg"
       >
+        {ssoError ? (
+          <p className="mb-4 text-center text-sm text-amber-300/90">
+            Nexus sign-in: {ssoError}
+          </p>
+        ) : null}
+
         <div className="text-center mb-8">
           <motion.div
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 text-xs uppercase tracking-[0.3em] mb-6"

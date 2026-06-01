@@ -1,11 +1,13 @@
 export const SESSION_COOKIE = "jarvis_session";
 
-/** Session cookie with no Max-Age — cleared when the browser/app quits */
+export const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 30;
+
 export const SESSION_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "lax" as const,
   path: "/",
+  maxAge: SESSION_MAX_AGE_SEC,
 };
 
 export function isLocalAuthMode(): boolean {

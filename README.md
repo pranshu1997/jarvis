@@ -91,7 +91,7 @@ On first login, system templates (`user_id IS NULL`) are cloned to the user via 
 ### 1. Push to GitHub
 
 ```bash
-git push origin master
+git push origin main
 ```
 
 ### 2. Import on Vercel
