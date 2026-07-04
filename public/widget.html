@@ -3,49 +3,202 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jarvis Widget</title>
+  <title>Jarvis Widget v3</title>
   <style>
-    body { font-family: system-ui, sans-serif; background: #020617; color: #a5f3fc; margin: 0; padding: 12px; }
-    .pct { font-size: 2rem; font-weight: bold; color: #22d3ee; }
-    button { margin-top: 8px; width: 100%; padding: 10px; background: #0891b2; border: none; border-radius: 8px; color: #0f172a; font-weight: 600; cursor: pointer; }
-    a { color: #67e8f9; font-size: 12px; display: block; margin-top: 8px; text-align: center; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #020617;
+      color: #a5f3fc;
+      margin: 0;
+      padding: 12px;
+      min-height: 100vh;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .label { font-size: 9px; opacity: 0.4; letter-spacing: 0.2em; text-transform: uppercase; }
+    .pct { font-size: 2.2rem; font-weight: 800; color: #22d3ee; line-height: 1; }
+    .streak-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(251,146,60,0.15);
+      border: 1px solid rgba(251,146,60,0.3);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fb923c;
+    }
+    .sub { font-size: 11px; opacity: 0.6; margin: 4px 0 8px; }
+    .xp-bar-bg {
+      width: 100%;
+      height: 4px;
+      background: rgba(0,212,255,0.1);
+      border-radius: 4px;
+      margin: 6px 0;
+    }
+    .xp-bar-fill {
+      height: 4px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #00d4ff, #a855f7);
+      transition: width 0.5s ease;
+    }
+    .habits-list { margin: 8px 0; }
+    .habit-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(0,212,255,0.05);
+      cursor: pointer;
+    }
+    .habit-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid rgba(0,212,255,0.4);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+    .habit-check.done { background: #22d3ee; border-color: #22d3ee; color: #020617; }
+    .habit-name { font-size: 12px; flex: 1; }
+    .habit-name.done { opacity: 0.4; text-decoration: line-through; }
+    .btn {
+      margin-top: 10px;
+      width: 100%;
+      padding: 10px;
+      background: rgba(0,212,255,0.2);
+      border: 1px solid rgba(0,212,255,0.4);
+      border-radius: 8px;
+      color: #a5f3fc;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: rgba(0,212,255,0.3); }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .link { color: #67e8f9; font-size: 11px; text-decoration: none; opacity: 0.6; }
+    .link:hover { opacity: 1; }
+    .sync-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #22d3ee;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
   </style>
 </head>
 <body>
-  <p style="font-size:10px;opacity:0.5;margin:0 0 4px">JARVIS PROTOCOL</p>
-  <div class="pct" id="pct">—%</div>
-  <p id="sub" style="font-size:12px;opacity:0.7;margin:4px 0">Loading…</p>
-  <button id="go" type="button" disabled>Open Jarvis</button>
-  <a href="/">Full app →</a>
+  <div class="header">
+    <div>
+      <div class="label">JARVIS · v2</div>
+      <div class="pct" id="pct">—%</div>
+    </div>
+    <div class="streak-badge" id="streak">🔥 —</div>
+  </div>
+
+  <div class="xp-bar-bg">
+    <div class="xp-bar-fill" id="xp-bar" style="width:0%"></div>
+  </div>
+
+  <div class="sub" id="sub">Loading protocol…</div>
+
+  <div class="habits-list" id="habits"></div>
+
+  <button class="btn" id="go" type="button" disabled>Open Jarvis</button>
+
+  <div class="footer">
+    <a class="link" href="/app/mobile/today">Today →</a>
+    <div class="sync-dot" id="dot"></div>
+    <a class="link" href="/app">Full app →</a>
+  </div>
+
   <script>
+    let data = null;
+
     async function load() {
       try {
         const r = await fetch('/api/widgets/snapshot', { credentials: 'include' });
         if (!r.ok) throw new Error('auth');
-        const d = await r.json();
-        document.getElementById('pct').textContent = d.completionPercent + '%';
-        document.getElementById('sub').textContent =
-          (d.priorityHabit ? d.priorityHabit.name : 'Daily protocol') +
-          ' · Lv.' + d.playerLevel + ' ' + d.rank;
-        const btn = document.getElementById('go');
-        btn.disabled = false;
-        btn.textContent = d.priorityHabit ? 'Complete: ' + d.priorityHabit.name : 'Open Jarvis';
-        btn.onclick = () => {
-          if (d.priorityHabit) {
-            fetch('/api/habits/complete', {
-              method: 'POST',
-              credentials: 'include',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ habitId: d.priorityHabit.id, completed: true }),
-            }).then(() => load());
-          } else {
-            location.href = '/app/mobile/dashboard';
-          }
-        };
+        data = await r.json();
+        render();
       } catch {
-        document.getElementById('sub').textContent = 'Log in at jarvis first';
+        document.getElementById('sub').textContent = 'Log in at Jarvis first';
+        document.getElementById('pct').textContent = '—%';
+        document.getElementById('streak').textContent = '🔥 —';
       }
     }
+
+    function render() {
+      if (!data) return;
+      document.getElementById('pct').textContent = data.completionPercent + '%';
+
+      const streak = data.topStreak ?? 0;
+      document.getElementById('streak').textContent = '🔥 ' + streak + 'd';
+
+      const xpPct = data.xpPercent ?? 0;
+      document.getElementById('xp-bar').style.width = xpPct + '%';
+
+      document.getElementById('sub').textContent =
+        'Lv.' + data.playerLevel + ' ' + data.rank +
+        (data.shadowCoins ? ' · ⚡' + data.shadowCoins + ' SC' : '');
+
+      const habitsEl = document.getElementById('habits');
+      habitsEl.innerHTML = '';
+      const habits = data.topHabits ?? [];
+      habits.slice(0, 4).forEach(function(h) {
+        const row = document.createElement('div');
+        row.className = 'habit-row';
+        row.innerHTML =
+          '<div class="habit-check' + (h.done ? ' done' : '') + '">' +
+          (h.done ? '✓' : '') + '</div>' +
+          '<span class="habit-name' + (h.done ? ' done' : '') + '">' + h.name + '</span>';
+        if (!h.done) {
+          row.onclick = function() { completeHabit(h.id, h.name); };
+        }
+        habitsEl.appendChild(row);
+      });
+
+      const btn = document.getElementById('go');
+      btn.disabled = false;
+      if (data.priorityHabit && !data.priorityHabit.done) {
+        btn.textContent = 'Complete: ' + data.priorityHabit.name;
+        btn.onclick = function() { completeHabit(data.priorityHabit.id, data.priorityHabit.name); };
+      } else {
+        btn.textContent = data.completionPercent >= 100 ? '🎉 Protocol complete!' : 'Open Jarvis';
+        btn.onclick = function() { location.href = '/app/mobile/dashboard'; };
+      }
+    }
+
+    async function completeHabit(id, name) {
+      try {
+        await fetch('/api/habits/complete', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ habitId: id, completed: true }),
+        });
+        await load();
+      } catch {
+        alert('Failed to complete ' + name);
+      }
+    }
+
     load();
     setInterval(load, 60000);
   </script>

@@ -19,24 +19,37 @@ export async function GET(request: Request) {
   const verified = await verifyNexusSsoToken(token);
   if (!verified.ok) {
     return NextResponse.redirect(
-      localAppUrl(request, "/", { sso_error: verified.error })
+      localAppUrl(request, "/", {
+        from: "nexus",
+        sso_error: verified.error,
+      })
     );
   }
 
   const provisioned = await ensureLocalUserFromNexus(verified.username);
   if (!provisioned.ok) {
     return NextResponse.redirect(
-      localAppUrl(request, "/", { sso_error: provisioned.error })
+      localAppUrl(request, "/", {
+        from: "nexus",
+        sso_error: provisioned.error,
+      })
     );
   }
 
   const user = await findUserByUsername(verified.username);
   if (!user) {
-    return NextResponse.redirect(localAppUrl(request, "/"));
+    return NextResponse.redirect(
+      localAppUrl(request, "/", {
+        from: "nexus",
+        sso_error: "User not found after Nexus provisioning.",
+      })
+    );
   }
 
   const sessionToken = await createSession(user.id, user.username);
-  const response = NextResponse.redirect(localAppUrl(request, "/app"));
+  const response = NextResponse.redirect(
+    localAppUrl(request, "/app/desktop/dashboard")
+  );
   response.cookies.set(SESSION_COOKIE, sessionToken, SESSION_COOKIE_OPTIONS);
   return response;
 }

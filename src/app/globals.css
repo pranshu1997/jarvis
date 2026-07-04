@@ -25,6 +25,32 @@
     @apply bg-cyan-500/30 text-cyan-50;
   }
 
+  html.light-mode body {
+    @apply bg-slate-100 text-slate-900;
+    background-image: none;
+  }
+
+  html.light-mode .glass {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: rgba(6, 182, 212, 0.2);
+  }
+
+  html.particle-boost-active body::after {
+    content: "";
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(34, 211, 238, 0.15) 1px, transparent 1px);
+    background-size: 24px 24px;
+    animation: particle-drift 20s linear infinite;
+    z-index: 0;
+  }
+
+  @keyframes particle-drift {
+    from { transform: translateY(0); }
+    to { transform: translateY(-24px); }
+  }
+
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -79,5 +105,17 @@
       rgba(0, 212, 255, 0.02) 4px
     );
     pointer-events: none;
+  }
+
+  html.compact-mode .glass {
+    @apply backdrop-blur-md;
+  }
+
+  html.compact-mode main .space-y-8 > * + * {
+    margin-top: 1.25rem;
+  }
+
+  html.compact-mode main .space-y-6 > * + * {
+    margin-top: 0.875rem;
   }
 }

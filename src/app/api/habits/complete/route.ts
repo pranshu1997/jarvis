@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { completeHabitInState, type CompleteHabitResult } from "@/lib/game-logic";
 import { isLocalAuthMode } from "@/lib/auth/config";
 import { GameAuthError, withGameState } from "@/lib/local/game-action";
+import { fireWebhook } from "@/lib/webhooks";
+import type { Profile } from "@/types/database";
 
 export async function POST(request: Request) {
   if (!isLocalAuthMode()) {
@@ -27,14 +29,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, xpEarned: 0 });
     }
 
-    const completion = { result: null as CompleteHabitResult | null };
+    const completion = { result: null as CompleteHabitResult | null, profile: null as Profile | null };
     await withGameState((state) => {
       completion.result = completeHabitInState(state, habitId, state.profile.id);
+      completion.profile = state.profile;
     });
 
     const result = completion.result;
     if (!result) {
       return NextResponse.json({ success: true, xpEarned: 0, alreadyDone: true });
+    }
+
+    if (completion.profile) {
+      const p = completion.profile;
+      if (result.newRank !== result.previousRank) {
+        void fireWebhook("rank_up", { from: result.previousRank, to: result.newRank }, p);
+      }
+      if (result.perfectDay) {
+        void fireWebhook("perfect_day", { xp: result.xpEarned }, p);
+      }
     }
 
     return NextResponse.json({
@@ -48,6 +61,8 @@ export async function POST(request: Request) {
       leveledUp: result.playerLevel > result.previousLevel,
       categoryComplete: result.categoryComplete,
       perfectDay: result.perfectDay,
+      isPerfectWeek: result.isPerfectWeek,
+      phoenixBonus: result.phoenixBonus,
       comboCount: result.comboCount,
     });
   } catch (e) {

@@ -14,7 +14,13 @@ import { WorkoutSessionBar } from "@/components/workout/WorkoutSessionBar";
 import { getActiveSession } from "@/lib/workout-progression";
 import { suggestNextSession } from "@/lib/progressive-overload";
 import { ExerciseProgressChart } from "@/components/workout/ExerciseProgressChart";
+import { RestTimer } from "@/components/workout/RestTimer";
+import { WorkoutTemplates } from "@/components/workout/WorkoutTemplates";
+import { useGameStore } from "@/stores/game-store";
 import { cn } from "@/lib/utils";
+import { SportDrillPicker } from "@/components/features/SportDrillPicker";
+import { SupersetQuickLog } from "@/components/features/SupersetQuickLog";
+import { MacroQuickLog } from "@/components/features/MacroQuickLog";
 
 const TABS = [
   { id: "lift", label: "Strength" },
@@ -32,6 +38,8 @@ export default function DesktopWorkoutPage() {
   const [weight, setWeight] = useState("");
   const [reps, setReps] = useState("");
   const [sets, setSets] = useState("");
+  const [rpe, setRpe] = useState("");
+  const [notes, setNotes] = useState("");
 
   if (isLoading || !stats) return null;
 
@@ -53,12 +61,18 @@ export default function DesktopWorkoutPage() {
         weight: weight ? Number(weight) : undefined,
         reps: reps ? Number(reps) : undefined,
         sets: sets ? Number(sets) : undefined,
+        rpe: rpe ? Number(rpe) : undefined,
+        notes: notes || undefined,
       }),
     });
     const data = await res.json();
     if (!res.ok) {
       useToastStore.getState().show(data.error ?? "Failed", "error");
       return;
+    }
+    if (data.isPr) {
+      const ex = exercises.find((e) => e.id === selectedId);
+      useGameStore.getState().triggerPr(ex?.name ?? "Exercise", weight ? Number(weight) : null);
     }
     useToastStore.getState().show(
       data.isPr ? `PR! +${data.xpEarned} XP` : `+${data.xpEarned} XP logged`,
@@ -106,9 +120,21 @@ export default function DesktopWorkoutPage() {
             )}
           </div>
         )}
+        <div className="mt-4">
+          <p className="text-xs text-cyan-500/50 mb-2">Quick macros</p>
+          <MacroQuickLog />
+        </div>
       </header>
 
       <WorkoutSessionBar activeSession={activeSession} onChange={refetch} />
+      <div className="grid grid-cols-2 gap-4">
+        <RestTimer />
+        <WorkoutTemplates
+          exercises={exercises}
+          onSelectExercise={setSelectedId}
+          onStartSession={refetch}
+        />
+      </div>
 
       <div className="flex gap-2 border-b border-cyan-500/20 pb-2">
         {TABS.map((t) => (
@@ -130,6 +156,7 @@ export default function DesktopWorkoutPage() {
 
       {tab === "lift" && (
         <>
+          <SupersetQuickLog exerciseIds={exercises.slice(0, 3).map((e) => e.id)} />
           <div className="grid grid-cols-3 gap-6">
             {Object.entries(byMuscle).map(([muscle, exs], i) => (
               <HolographicCard key={muscle} delay={i * 0.05}>
@@ -223,6 +250,26 @@ export default function DesktopWorkoutPage() {
                     className="block mt-1 px-3 py-2 rounded-lg bg-slate-900 border border-cyan-500/20 text-cyan-50 w-20"
                   />
                 </div>
+                <div>
+                  <label className="text-xs text-cyan-500/50">RPE (1-10)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={rpe}
+                    onChange={(e) => setRpe(e.target.value)}
+                    className="block mt-1 px-3 py-2 rounded-lg bg-slate-900 border border-cyan-500/20 text-cyan-50 w-20"
+                  />
+                </div>
+                <div className="flex-1 min-w-[200px]">
+                  <label className="text-xs text-cyan-500/50">Notes</label>
+                  <input
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Felt strong…"
+                    className="block mt-1 w-full px-3 py-2 rounded-lg bg-slate-900 border border-cyan-500/20 text-cyan-50"
+                  />
+                </div>
                 <Button onClick={logWorkout}>Log + XP</Button>
               </CardContent>
             </Card>
@@ -250,7 +297,10 @@ export default function DesktopWorkoutPage() {
       )}
 
       {tab === "sports" && (
-        <SportsPanel sports={sports} onLogged={refetch} />
+        <div className="space-y-6">
+          <SportDrillPicker />
+          <SportsPanel sports={sports} onLogged={refetch} />
+        </div>
       )}
 
       {tab === "skills" && <SkillTreeView skills={skills} />}

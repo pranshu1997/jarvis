@@ -35,6 +35,11 @@ export function DebriefModal() {
   const todayXp =
     stats.todayXpEarned ?? dc.total_xp ?? 0;
 
+  const incomplete = stats.habits.filter((h) => h.is_active && !h.completed_today);
+  const tomorrowPriority = incomplete[0]?.name ?? "Maintain your streak";
+  const intention = (stats.meta as { todayIntention?: string })?.todayIntention;
+  const dailyWin = (stats.meta as { dailyWin?: string })?.dailyWin;
+
   const dismiss = () => {
     const today = new Date().toISOString().slice(0, 10);
     sessionStorage.setItem(`${DEBRIEF_KEY}-${today}`, "1");
@@ -97,6 +102,36 @@ export function DebriefModal() {
                 ? "Flawless execution. You are evolving."
                 : "Tomorrow is another dungeon. Rest well, Hunter."}
             </p>
+
+            {intention && (
+              <p className="text-sm text-cyan-200/70 mt-4 italic border-l-2 border-cyan-500/30 pl-3">
+                Today&apos;s intention: &ldquo;{intention}&rdquo;
+              </p>
+            )}
+
+            {dailyWin && (
+              <p className="text-sm text-amber-200/70 mt-4 border-l-2 border-amber-500/30 pl-3">
+                Today&apos;s win: &ldquo;{dailyWin}&rdquo;
+              </p>
+            )}
+
+            <div className="mt-4 rounded-xl border border-cyan-500/15 bg-cyan-950/30 p-3 space-y-2">
+              <p className="text-xs uppercase tracking-widest text-cyan-500/40">Evening Review</p>
+              <p className="text-xs text-cyan-300/70">
+                <span className="text-emerald-400/80">Went well:</span>{" "}
+                {dc.completed_habits} habits · +{formatNumber(todayXp)} XP
+              </p>
+              {incomplete.length > 0 && (
+                <p className="text-xs text-cyan-300/70">
+                  <span className="text-amber-400/80">Slipped:</span>{" "}
+                  {incomplete.map((h) => h.name).slice(0, 3).join(", ")}
+                  {incomplete.length > 3 ? ` +${incomplete.length - 3} more` : ""}
+                </p>
+              )}
+              <p className="text-xs text-cyan-200/80">
+                <span className="text-cyan-400/80">Tomorrow priority:</span> {tomorrowPriority}
+              </p>
+            </div>
 
             <Button className="w-full mt-6" onClick={dismiss}>
               Dismiss

@@ -30,7 +30,7 @@ export function NotificationPrompt() {
       (h) => h.is_active && !h.completed_today
     ).length;
     if (incomplete > 0) {
-      new Notification("Jarvis Protocol", {
+      new Notification("Forge Protocol", {
         body: `${incomplete} habits left today. Protect your streaks.`,
         icon: "/icons/icon-192.png",
       });

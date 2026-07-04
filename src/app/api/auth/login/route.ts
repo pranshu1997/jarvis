@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { verifyPassword } from "@/lib/auth/password";
+import { verifyUserPassword } from "@/lib/auth/verify-user-password";
 import {
   SESSION_COOKIE,
   SESSION_COOKIE_OPTIONS,
@@ -27,11 +27,14 @@ export async function POST(request: Request) {
   }
 
   const user = await findUserByUsername(username);
-  if (!user || !user.password_hash) {
+  if (
+    !user ||
+    (!user.password_hash && !(user.salt_b64 && user.hash_b64))
+  ) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
-  const valid = await verifyPassword(password, user.password_hash);
+  const valid = await verifyUserPassword(user, password);
   if (!valid) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }

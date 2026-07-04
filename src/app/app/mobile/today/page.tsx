@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useDashboard } from "@/hooks/useDashboard";
 import { filterHabitsByPeriod, getCurrentPeriod } from "@/lib/habit-periods";
+import { filterSnoozedHabits } from "@/lib/snooze-filter";
+import { sortHabitsByUserOrder, getHabitSortOrder } from "@/lib/player-settings-extended";
 import { Button } from "@/components/ui/button";
 
 export default function MobileTodayPage() {
@@ -11,12 +13,19 @@ export default function MobileTodayPage() {
   if (isLoading || !stats) return null;
 
   const period = getCurrentPeriod();
+  const order = getHabitSortOrder(stats);
   const habits = filterHabitsByPeriod(
-    stats.habits.filter(
-      (h) =>
-        h.is_active &&
-        !h.completed_today &&
-        !(h.metadata as { skipped_today?: boolean }).skipped_today
+    sortHabitsByUserOrder(
+      filterSnoozedHabits(
+        stats.habits.filter(
+          (h) =>
+            h.is_active &&
+            !h.completed_today &&
+            !(h.metadata as { skipped_today?: boolean }).skipped_today
+        ),
+        stats.profile
+      ),
+      order
     ),
     period
   ).slice(0, 4);

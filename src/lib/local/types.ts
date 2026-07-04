@@ -11,7 +11,10 @@ export interface LocalUser {
   id: string;
   username: string;
   display_name: string;
+  /** Legacy bcrypt hash; prefer salt_b64 + hash_b64 (Nexus-compatible PBKDF2). */
   password_hash: string | null;
+  salt_b64?: string | null;
+  hash_b64?: string | null;
   webauthn_credentials: WebAuthnCredentialRecord[];
   webauthn_challenge?: string;
   created_at: string;

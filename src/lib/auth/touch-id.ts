@@ -5,7 +5,7 @@ const execFileAsync = promisify(execFile);
 
 export async function verifyTouchId(
   username: string,
-  appName = "Jarvis"
+  appName = "Forge"
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const normalized = username.trim().toLowerCase();
   if (!normalized) {

@@ -8,6 +8,7 @@ import { SkipHabitDialog } from "@/components/features/SkipHabitDialog";
 import { HABIT_PERIODS, filterHabitsByPeriod, type HabitPeriod } from "@/lib/habit-periods";
 import { useDashboard } from "@/hooks/useDashboard";
 import { cn } from "@/lib/utils";
+import { jarvisFetch } from "@/lib/api-client";
 
 export default function MobileLogPage() {
   const [active, setActive] = useState<HabitPeriod>("morning");
@@ -102,6 +103,15 @@ export default function MobileLogPage() {
         onConfirm={(reason) => {
           if (skipTarget) void skipHabit(skipTarget.id, reason);
           setSkipTarget(null);
+        }}
+        onSnooze={async () => {
+          if (!skipTarget) return;
+          await jarvisFetch("/api/habits/snooze", {
+            method: "POST",
+            body: JSON.stringify({ habitId: skipTarget.id }),
+          });
+          setSkipTarget(null);
+          refetch();
         }}
       />
     </div>

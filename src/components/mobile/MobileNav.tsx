@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  BarChart3,
   Dumbbell,
   LayoutDashboard,
+  MoreHorizontal,
   Scroll,
   Shield,
   Swords,
@@ -19,7 +19,16 @@ const TABS = [
   { href: "/app/mobile/log", label: "Log", icon: Swords },
   { href: "/app/mobile/workout", label: "Train", icon: Dumbbell },
   { href: "/app/mobile/stats", label: "Stats", icon: Shield },
-  { href: "/app/mobile/profile", label: "Profile", icon: BarChart3 },
+  { href: "/app/mobile/more", label: "More", icon: MoreHorizontal },
+];
+
+const MORE_PREFIXES = [
+  "/app/mobile/trophy",
+  "/app/mobile/shop",
+  "/app/mobile/weekly",
+  "/app/mobile/analytics",
+  "/app/mobile/coach",
+  "/app/mobile/more",
 ];
 
 export function MobileNav() {
@@ -29,7 +38,10 @@ export function MobileNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-cyan-500/20 pb-safe">
       <div className="flex items-center justify-around px-2 py-2">
         {TABS.map((tab) => {
-          const active = pathname === tab.href;
+          const active =
+            tab.href === "/app/mobile/more"
+              ? MORE_PREFIXES.some((p) => pathname.startsWith(p))
+              : pathname === tab.href;
           const Icon = tab.icon;
           return (
             <Link key={tab.href} href={tab.href} className="flex-1">

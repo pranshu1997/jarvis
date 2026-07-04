@@ -1,6 +1,7 @@
 "use client";
 
 import { AchievementsPanel } from "@/components/features/AchievementsPanel";
+import { AchievementHintsPanel } from "@/components/features/AchievementHintsPanel";
 import { useGameStore } from "@/stores/game-store";
 import { useDashboard } from "@/hooks/useDashboard";
 import { getExtended } from "@/lib/player-settings-extended";
@@ -22,6 +23,7 @@ export default function TrophyRoomPage() {
           Resilience score: {resilience} · Phoenix recoveries &amp; milestones
         </p>
       </header>
+      <AchievementHintsPanel />
       <AchievementsPanel achievements={achievements} />
     </div>
   );

@@ -22,6 +22,10 @@ export function generateWeeklyQuestsIfNeeded(state: DashboardStats): boolean {
   const weakestCat = [...state.categories].sort(
     (a, b) => a.total_xp - b.total_xp
   )[0];
+  const focusCatSlug = ext.weekly_focus_category;
+  const focusCat = focusCatSlug
+    ? state.categories.find((c) => c.slug === focusCatSlug)
+    : null;
 
   const newQuests = [
     {
@@ -48,6 +52,16 @@ export function generateWeeklyQuestsIfNeeded(state: DashboardStats): boolean {
       meta: { perfect_days: true },
     },
   ];
+
+  if (focusCat) {
+    newQuests.push({
+      title: `Weekly focus: ${focusCat.name}`,
+      slug: "weekly_focus_category",
+      target: 7,
+      xp: 120,
+      meta: { category_slug: focusCat.slug },
+    });
+  }
 
   for (const nq of newQuests) {
     state.quests.push({

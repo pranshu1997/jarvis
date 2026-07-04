@@ -6,6 +6,10 @@ import { Check, Flame, Shield } from "lucide-react";
 import { IconResolver } from "@/components/shared/IconResolver";
 import { NumericHabitControl } from "@/components/features/NumericHabitControl";
 import { getHabitProgress } from "@/lib/game-logic";
+import { HabitLockBadge } from "@/components/features/HabitLockBadge";
+import { useGameStore } from "@/stores/game-store";
+import { getHabitSortOrder, sortHabitsByUserOrder } from "@/lib/player-settings-extended";
+import { filterSnoozedHabits } from "@/lib/snooze-filter";
 import { cn } from "@/lib/utils";
 import type { Habit } from "@/types/database";
 
@@ -112,7 +116,10 @@ function SwipeCard({
           )}
         </div>
         <div className="flex-1">
-          <p className="font-medium text-cyan-100">{habit.name}</p>
+          <p className="font-medium text-cyan-100 flex items-center gap-2">
+            {habit.name}
+            <HabitLockBadge habit={habit} />
+          </p>
           <p className="text-xs text-cyan-500/40">Swipe right → complete</p>
         </div>
         {habit.current_streak > 0 && (
@@ -141,7 +148,15 @@ export function SwipeHabitList({
   onIncrement,
   onCompleteCategory,
 }: SwipeHabitListProps) {
-  const grouped = habits.reduce(
+  const profile = useGameStore((s) => s.stats?.profile);
+  const allStats = useGameStore((s) => s.stats);
+  let visible = habits;
+  if (profile && allStats) {
+    visible = filterSnoozedHabits(habits, profile);
+    visible = sortHabitsByUserOrder(visible, getHabitSortOrder(allStats));
+  }
+
+  const grouped = visible.reduce(
     (acc, h) => {
       const slug =
         (h.metadata as { category_slug?: string })?.category_slug ?? "other";

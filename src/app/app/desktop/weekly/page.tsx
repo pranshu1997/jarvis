@@ -8,6 +8,11 @@ import { Button } from "@/components/ui/button";
 import { jarvisFetch } from "@/lib/api-client";
 import { getWeekKey, getPlayerSettings } from "@/lib/player-settings";
 import { useToastStore } from "@/stores/toast-store";
+import { WeeklyShareButton } from "@/components/features/WeeklyShareButton";
+import { PrintableDossierButton } from "@/components/features/PrintableDossierButton";
+import { PerfectWeekCountdown } from "@/components/features/PerfectWeekCountdown";
+import { WeeklyFocusCategoryPicker } from "@/components/features/WeeklyFocusCategoryPicker";
+import { CalendarSubscribeButton } from "@/components/features/CalendarSubscribeButton";
 
 export default function WeeklyReviewPage() {
   const stats = useGameStore((s) => s.stats);
@@ -55,7 +60,16 @@ export default function WeeklyReviewPage() {
           Weekly Review
         </h1>
         <p className="text-cyan-500/50 mt-1">Week {getWeekKey()} · Plan next evolution</p>
+        <div className="flex flex-wrap gap-4 mt-3">
+          <WeeklyShareButton />
+          <PrintableDossierButton />
+        </div>
       </header>
+
+      <PerfectWeekCountdown />
+
+      <WeeklyFocusCategoryPicker />
+      <CalendarSubscribeButton />
 
       <div className="grid grid-cols-2 gap-4">
         <Card glow>

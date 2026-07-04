@@ -51,3 +51,4 @@ legacy-streamlit/__pycache__
 .claude/
 __pycache__/
 *.pyc
+data/

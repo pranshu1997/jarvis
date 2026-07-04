@@ -1,29 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useGameStore } from "@/stores/game-store";
 import { HabitList } from "@/components/features/HabitList";
 import { SupplementStack } from "@/components/features/SupplementStack";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
-
-const FOCUS_KEY = "jarvis_focus_mode";
-
-export function getFocusMode(): boolean {
-  if (typeof window === "undefined") return false;
-  return localStorage.getItem(FOCUS_KEY) === "1";
-}
-
-export function setFocusMode(on: boolean) {
-  localStorage.setItem(FOCUS_KEY, on ? "1" : "0");
-}
+import { useFocusMode } from "@/contexts/FocusModeContext";
 
 export function FocusModeToggle({ className }: { className?: string }) {
-  const [on, setOn] = useState(false);
-
-  useEffect(() => {
-    setOn(getFocusMode());
-  }, []);
+  const { focusMode, toggleFocusMode } = useFocusMode();
 
   return (
     <Button
@@ -31,13 +16,10 @@ export function FocusModeToggle({ className }: { className?: string }) {
       variant="outline"
       size="sm"
       className={className}
-      onClick={() => {
-        setFocusMode(!on);
-        window.location.reload();
-      }}
+      onClick={toggleFocusMode}
     >
-      {on ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-      {on ? "Full HUD" : "Focus mode"}
+      {focusMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      {focusMode ? "Full HUD" : "Focus mode"}
     </Button>
   );
 }
@@ -52,13 +34,9 @@ export function FocusModePanel({
   onSupplement: (id: string, taken: boolean) => void;
 }) {
   const stats = useGameStore((s) => s.stats);
-  const [focusOn, setFocusOn] = useState(false);
+  const { focusMode } = useFocusMode();
 
-  useEffect(() => {
-    setFocusOn(getFocusMode());
-  }, []);
-
-  if (!stats || !focusOn) return null;
+  if (!stats || !focusMode) return null;
 
   const next = stats.habits
     .filter(

@@ -28,9 +28,9 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!password || password.length < 6) {
+  if (!password || password.length < 8) {
     return NextResponse.json(
-      { error: "Password must be at least 6 characters" },
+      { error: "Password must be at least 8 characters" },
       { status: 400 }
     );
   }
@@ -47,14 +47,16 @@ export async function POST(request: Request) {
   }
 
   const id = randomUUID();
-  const password_hash = await hashPassword(password);
+  const { salt_b64, hash_b64 } = hashPassword(password);
   const game_state = createInitialGameState(id, displayName);
 
   const user: LocalUserRecord = {
     id,
     username,
     display_name: displayName,
-    password_hash,
+    password_hash: null,
+    salt_b64,
+    hash_b64,
     webauthn_credentials: [],
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

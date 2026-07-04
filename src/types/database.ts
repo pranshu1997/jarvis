@@ -256,6 +256,8 @@ export interface WorkoutLogEntry {
   weight: number | null;
   reps: number | null;
   sets: number | null;
+  rpe?: number | null;
+  notes?: string | null;
   xp_earned: number;
   is_pr: boolean;
 }

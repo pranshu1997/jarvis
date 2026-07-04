@@ -21,14 +21,14 @@ const orbitron = Orbitron({
 });
 
 export const metadata: Metadata = {
-  title: "Jarvis — Personal Evolution System",
+  title: "Forge — Personal Evolution System",
   description:
     "Private personal productivity RPG. Level up your real life.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Jarvis",
+    title: "Forge",
   },
   icons: {
     icon: "/icons/icon-192.png",

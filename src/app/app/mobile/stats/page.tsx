@@ -2,6 +2,8 @@
 
 import { CategoryGrid } from "@/components/features/CategoryGrid";
 import { WeightTrendCard } from "@/components/features/WeightTrendCard";
+import { MacroTargetRings } from "@/components/features/MacroTargetRings";
+import { MeasurementTrendAlert } from "@/components/features/MeasurementTrendAlert";
 import { useGameStore } from "@/stores/game-store";
 import { useDashboard } from "@/hooks/useDashboard";
 import { HolographicCard } from "@/components/shared/HolographicCard";
@@ -14,6 +16,8 @@ export default function MobileStatsPage() {
   return (
     <div className="space-y-6 pt-4">
       <h2 className="font-display text-xl font-bold text-cyan-100">Stats</h2>
+      <MeasurementTrendAlert />
+      <MacroTargetRings />
       <CategoryGrid categories={stats.categories} variant="mobile" />
       <WeightTrendCard stats={stats} onLogged={refetch} />
       <section>

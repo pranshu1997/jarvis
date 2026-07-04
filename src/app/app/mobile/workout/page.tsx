@@ -3,12 +3,18 @@
 import { useState } from "react";
 import { useDashboard } from "@/hooks/useDashboard";
 import { WorkoutSessionBar } from "@/components/workout/WorkoutSessionBar";
+import { LastWorkoutResume } from "@/components/workout/LastWorkoutResume";
+import { WorkoutReadinessBanner } from "@/components/features/WorkoutReadinessBanner";
+import { PRPredictionCard } from "@/components/features/PRPredictionCard";
 import { SportsPanel } from "@/components/workout/SportsPanel";
 import { SkillTreeView } from "@/components/workout/SkillTreeView";
 import { getActiveSession } from "@/lib/workout-progression";
 import { Button } from "@/components/ui/button";
 import { useToastStore } from "@/stores/toast-store";
 import { cn } from "@/lib/utils";
+import { SportDrillPicker } from "@/components/features/SportDrillPicker";
+import { HydrationQuickLog } from "@/components/features/HydrationQuickLog";
+import { MacroQuickLog } from "@/components/features/MacroQuickLog";
 
 export default function MobileWorkoutPage() {
   const { stats, refetch, isLoading } = useDashboard();
@@ -40,7 +46,12 @@ export default function MobileWorkoutPage() {
     <div className="space-y-4 pt-4 pb-24">
       <h2 className="font-display text-xl font-bold text-cyan-100">Workout</h2>
 
+      <LastWorkoutResume />
+      <WorkoutReadinessBanner />
+      <PRPredictionCard />
       <WorkoutSessionBar activeSession={activeSession} onChange={refetch} />
+      <MacroQuickLog />
+      <HydrationQuickLog />
 
       <div className="flex gap-2">
         {(["lift", "sports", "skills"] as const).map((v) => (
@@ -91,7 +102,10 @@ export default function MobileWorkoutPage() {
       )}
 
       {view === "sports" && (
-        <SportsPanel sports={stats.sports} onLogged={refetch} />
+        <div className="space-y-4">
+          <SportDrillPicker />
+          <SportsPanel sports={stats.sports} onLogged={refetch} />
+        </div>
       )}
 
       {view === "skills" && <SkillTreeView skills={stats.skills} />}

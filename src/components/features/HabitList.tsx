@@ -6,6 +6,11 @@ import { IconResolver } from "@/components/shared/IconResolver";
 import { NumericHabitControl } from "@/components/features/NumericHabitControl";
 import { getHabitProgress } from "@/lib/game-logic";
 import { getHabitBaseXp, getHabitMetadata } from "@/lib/habit-xp";
+import { HabitLockBadge } from "@/components/features/HabitLockBadge";
+import { HabitNoteButton } from "@/components/features/HabitNoteButton";
+import { useGameStore } from "@/stores/game-store";
+import { getHabitSortOrder, sortHabitsByUserOrder } from "@/lib/player-settings-extended";
+import { filterSnoozedHabits } from "@/lib/snooze-filter";
 import { cn } from "@/lib/utils";
 import type { Habit } from "@/types/database";
 
@@ -26,12 +31,17 @@ export function HabitList({
   compact = false,
   allHabits,
 }: HabitListProps) {
+  const stats = useGameStore((s) => s.stats);
   const pool = allHabits ?? habits;
-  const filtered = categorySlug
+  let filtered = categorySlug
     ? habits.filter(
         (h) => (h.metadata as { category_slug?: string })?.category_slug === categorySlug
       )
     : habits;
+  if (stats) {
+    filtered = filterSnoozedHabits(filtered, stats.profile);
+    filtered = sortHabitsByUserOrder(filtered, getHabitSortOrder(stats));
+  }
 
   if (filtered.length === 0) {
     return (
@@ -100,11 +110,13 @@ export function HabitList({
             <div className="flex-1 min-w-0">
               <p
                 className={cn(
-                  "font-medium truncate",
+                  "font-medium truncate flex items-center gap-2",
                   habit.completed_today ? "text-cyan-200" : "text-cyan-100/70"
                 )}
               >
                 {habit.name}
+                <HabitLockBadge habit={habit} />
+                {habit.completed_today && <HabitNoteButton habitId={habit.id} habitName={habit.name} />}
               </p>
               <p className="text-xs text-cyan-500/40">
                 +{getHabitBaseXp(habit, pool)} XP

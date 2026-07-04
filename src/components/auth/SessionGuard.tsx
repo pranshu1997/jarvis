@@ -62,7 +62,8 @@ export function SessionGuard({ children }: { children: React.ReactNode }) {
       }
 
       if (data.demo) {
-        sessionStorage.setItem(SESSION_FLAG, "1");
+        sessionStorage.removeItem(SESSION_FLAG);
+        router.replace("/");
         return;
       }
 

@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   const body = await request.json();
   const { habitId, reason } = body as {
     habitId: string;
-    reason?: "rest" | "sick" | "travel";
+    reason?: "rest" | "sick" | "travel" | "busy" | "forgot";
   };
 
   if (!habitId) {

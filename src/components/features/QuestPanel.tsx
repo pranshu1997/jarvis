@@ -3,6 +3,7 @@
 import { HolographicCard } from "@/components/shared/HolographicCard";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { QuestCountdown } from "@/components/features/QuestCountdown";
 import type { Quest } from "@/types/database";
 
 const TYPE_COLORS: Record<string, string> = {
@@ -19,9 +20,18 @@ interface QuestPanelProps {
 }
 
 export function QuestPanel({ quests, compact = false }: QuestPanelProps) {
+  const sorted = [...quests].sort((a, b) => {
+    if (a.expires_at && b.expires_at) {
+      return new Date(a.expires_at).getTime() - new Date(b.expires_at).getTime();
+    }
+    if (a.expires_at) return -1;
+    if (b.expires_at) return 1;
+    return 0;
+  });
+
   return (
     <div className={cn("space-y-3", compact && "space-y-2")}>
-      {quests.map((quest, i) => {
+      {sorted.map((quest, i) => {
         const percent = Math.round(
           (quest.current_count / quest.target_count) * 100
         );
@@ -44,9 +54,12 @@ export function QuestPanel({ quests, compact = false }: QuestPanelProps) {
                   </p>
                 )}
               </div>
-              <span className="text-xs font-mono text-cyan-400 whitespace-nowrap">
-                +{quest.xp_reward} XP
-              </span>
+              <div className="flex flex-col items-end gap-0.5">
+                <span className="text-xs font-mono text-cyan-400 whitespace-nowrap">
+                  +{quest.xp_reward} XP
+                </span>
+                <QuestCountdown quest={quest} />
+              </div>
             </div>
             <Progress value={percent} className="h-1.5" />
             <p className="text-[10px] text-cyan-500/40 mt-1 font-mono">

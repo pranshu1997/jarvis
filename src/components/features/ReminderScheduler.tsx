@@ -31,7 +31,7 @@ export function ReminderScheduler() {
           if (fired.current.has(id)) continue;
           const h = stats.habits.find((x) => x.id === habitId);
           if (h && !h.completed_today) {
-            new Notification("Jarvis Protocol", {
+            new Notification("Forge Protocol", {
               body: `Time for: ${h.name}`,
               icon: "/icons/icon-192.png",
             });
@@ -48,6 +48,20 @@ export function ReminderScheduler() {
             icon: "/icons/icon-192.png",
           });
           fired.current.add("at-risk");
+        }
+      }
+
+      for (const q of stats.quests) {
+        if (q.status !== "active" || !q.expires_at) continue;
+        const hoursLeft = (new Date(q.expires_at).getTime() - Date.now()) / 3600000;
+        if (hoursLeft > 0 && hoursLeft <= 24) {
+          const id = `quest-exp-${q.id}`;
+          if (fired.current.has(id)) continue;
+          new Notification("Quest expiring", {
+            body: `"${q.title}" expires in ${Math.round(hoursLeft)}h`,
+            icon: "/icons/icon-192.png",
+          });
+          fired.current.add(id);
         }
       }
     };

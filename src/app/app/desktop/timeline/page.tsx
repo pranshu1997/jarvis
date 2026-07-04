@@ -1,13 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useGameStore } from "@/stores/game-store";
 import { formatDate } from "@/lib/utils";
 import { Zap } from "lucide-react";
+import { TimelineFilters } from "@/components/features/TimelineFilters";
 
 export default function DesktopTimelinePage() {
   const stats = useGameStore((s) => s.stats);
-  const events = stats?.recentXpEvents ?? [];
+  const [filter, setFilter] = useState("all");
+  const events = (stats?.recentXpEvents ?? []).filter((e) => {
+    if (filter === "all") return true;
+    if (filter === "habit") return e.entity_type === "habit";
+    if (filter === "workout") return e.entity_type === "workout" || e.entity_type === "exercise";
+    if (filter === "quest") return e.reason?.toLowerCase().includes("quest");
+    if (filter === "achievement") return e.reason?.toLowerCase().includes("achievement");
+    return true;
+  });
 
   return (
     <div className="p-8 space-y-8">
@@ -17,6 +27,8 @@ export default function DesktopTimelinePage() {
         </h1>
         <p className="text-cyan-500/50 mt-1">Your evolution history</p>
       </header>
+
+      <TimelineFilters onFilter={setFilter} />
 
       <div className="relative">
         <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-cyan-500/50 via-cyan-500/20 to-transparent" />

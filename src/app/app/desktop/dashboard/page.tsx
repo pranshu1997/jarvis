@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useMemo } from "react";
 import {
   Area,
   AreaChart,
@@ -31,7 +31,43 @@ import {
 import { ReadinessStrip } from "@/components/features/ReadinessStrip";
 import { DungeonBossBar } from "@/components/features/DungeonBossBar";
 import { RoutinePanel } from "@/components/features/RoutinePanel";
-import { useMemo } from "react";
+import { MainQuestPanel } from "@/components/features/MainQuestPanel";
+import { StreakShieldPanel } from "@/components/features/StreakShieldPanel";
+import { PinnedHabits } from "@/components/features/PinnedHabits";
+import { SyncIndicator } from "@/components/features/SyncIndicator";
+import { DashboardSection } from "@/components/features/DashboardSection";
+import { SkeletonDashboard as DashboardSkeleton } from "@/components/ui/SkeletonLoader";
+import { GuildWarBanner } from "@/components/features/GuildWarBanner";
+import { BossRushPanel } from "@/components/features/BossRushPanel";
+import { StreakCalendarMini } from "@/components/features/StreakCalendarMini";
+import { TodayIntentionInput } from "@/components/features/TodayIntentionInput";
+import { DungeonWeaknessHint } from "@/components/features/DungeonWeaknessHint";
+import { MorningRitualStrip } from "@/components/features/MorningRitualStrip";
+import { NextBestActionChip } from "@/components/features/NextBestActionChip";
+import { PerfectWeekCountdown } from "@/components/features/PerfectWeekCountdown";
+import { DeloadWeekBanner } from "@/components/features/DeloadWeekBanner";
+import { AppOpenStreakBadge } from "@/components/features/AppOpenStreakBadge";
+import { EvolutionGoalPanel } from "@/components/features/EvolutionGoalPanel";
+import { CategoryCompleteAllButton } from "@/components/features/CategoryCompleteAllButton";
+import { CompactModeToggle } from "@/components/features/CompactModeToggle";
+import { SidebarQuickStats } from "@/components/features/SidebarQuickStats";
+import { SnoozedHabitsBanner } from "@/components/features/SnoozedHabitsBanner";
+import { AtRiskHabitsPanel } from "@/components/features/AtRiskHabitsPanel";
+import { XpForecastCard } from "@/components/features/XpForecastCard";
+import { YesterdayCompareChip } from "@/components/features/YesterdayCompareChip";
+import { EveningWindDownStrip } from "@/components/features/EveningWindDownStrip";
+import { HealthSyncMiniBanner } from "@/components/features/HealthSyncMiniBanner";
+import { HydrationQuickLog } from "@/components/features/HydrationQuickLog";
+import { RecentHabitNotesPanel } from "@/components/features/RecentHabitNotesPanel";
+import { RankProgressMeter } from "@/components/features/RankProgressMeter";
+import { QuickWinsPanel } from "@/components/features/QuickWinsPanel";
+import { StreakLeaderboardMini } from "@/components/features/StreakLeaderboardMini";
+import { CategoryBalanceChip } from "@/components/features/CategoryBalanceChip";
+import { DailyWinInput } from "@/components/features/DailyWinInput";
+import { ComboWarningBanner } from "@/components/features/ComboWarningBanner";
+import { StallingCategoriesPanel } from "@/components/features/StallingCategoriesPanel";
+import { PinnedQuestPicker } from "@/components/features/PinnedQuestPicker";
+import { WidgetPreviewCard } from "@/components/features/WidgetPreviewCard";
 
 export default function DesktopDashboard() {
   const {
@@ -60,16 +96,10 @@ export default function DesktopDashboard() {
       }));
   }, [stats?.recentXpEvents]);
 
-  if (isLoading || !stats) {
-    return (
+  if (!stats) {
+    return isLoading ? <DashboardSkeleton /> : (
       <div className="p-8 flex items-center justify-center min-h-dvh">
-        <motion.p
-          animate={{ opacity: [0.4, 1, 0.4] }}
-          transition={{ repeat: Infinity, duration: 1.5 }}
-          className="font-display text-cyan-400 text-xl"
-        >
-          Initializing Command Center...
-        </motion.p>
+        <p className="font-display text-cyan-400 text-xl">Could not load dashboard</p>
       </div>
     );
   }
@@ -87,16 +117,38 @@ export default function DesktopDashboard() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <PlayerHeader profile={stats.profile} />
             <div className="flex flex-wrap items-center gap-2">
+              <SidebarQuickStats />
+              <AppOpenStreakBadge />
+              <SyncIndicator onRefresh={refetch} />
+              <CompactModeToggle />
               <ComboMeter stats={stats} />
               <FocusModeToggle />
             </div>
           </div>
+          <NextBestActionChip />
+          <YesterdayCompareChip />
+          <SnoozedHabitsBanner />
+          <HealthSyncMiniBanner />
+          <MorningRitualStrip onLogged={refetch} />
+          <EveningWindDownStrip />
+          <AtRiskHabitsPanel />
+          <DailyWinInput />
+          <CategoryBalanceChip />
+          <ComboWarningBanner />
+          <StallingCategoriesPanel />
+          <PerfectWeekCountdown />
+          <DeloadWeekBanner />
+          <MainQuestPanel />
+          <TodayIntentionInput />
+          <GuildWarBanner />
+          <PinnedHabits onComplete={completeHabit} />
           <FocusModePanel
             onComplete={completeHabit}
             onIncrement={incrementHabit}
             onSupplement={toggleSupplement}
           />
           {stats.meta?.dungeon && <DungeonBossBar dungeon={stats.meta.dungeon} />}
+          {stats.meta?.dungeon && <DungeonWeaknessHint />}
           <ReadinessStrip
             initial={
               (stats.meta?.readiness as import("@/lib/player-settings-extended").ReadinessEntry | null) ??
@@ -114,8 +166,11 @@ export default function DesktopDashboard() {
               {stats.meta.shadowCoins} Shadow Coins
             </p>
           )}
+          <StreakShieldPanel stats={stats} />
           <ProtocolStrip stats={stats} />
-          <RoutinePanel stats={stats} onComplete={completeHabit} onRoutineDone={refetch} />
+          <DashboardSection id="routines" title="Routines">
+            <RoutinePanel stats={stats} onComplete={completeHabit} onRoutineDone={refetch} />
+          </DashboardSection>
           <QuantifiedRings habits={stats.habits} />
           <QuantifiedProgressPanel habits={stats.habits} onAdjust={incrementHabit} />
           <section>
@@ -131,8 +186,9 @@ export default function DesktopDashboard() {
             {stats.categories.map((cat) => (
               <Card key={cat.id} glow>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base flex items-center gap-2">
+                  <CardTitle className="text-base flex items-center justify-between gap-2">
                     <span style={{ color: cat.color }}>{cat.name}</span>
+                    <CategoryCompleteAllButton categorySlug={cat.slug} label={cat.name} />
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -150,6 +206,17 @@ export default function DesktopDashboard() {
           </div>
         </div>
         <div className="col-span-4 space-y-6">
+          <EvolutionGoalPanel />
+          <RankProgressMeter />
+          <QuickWinsPanel />
+          <PinnedQuestPicker />
+          <XpForecastCard />
+          <HydrationQuickLog />
+          <RecentHabitNotesPanel />
+          <StreakLeaderboardMini />
+          <WidgetPreviewCard />
+          <StreakCalendarMini />
+          <BossRushPanel />
           <SupplementOverallCard supplements={stats.supplements} />
           <SupplementStack
             supplements={stats.supplements}

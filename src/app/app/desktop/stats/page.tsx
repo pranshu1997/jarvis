@@ -12,6 +12,8 @@ import { WeightTrendCard } from "@/components/features/WeightTrendCard";
 import { BodyMeasurementsCard } from "@/components/features/BodyMeasurementsCard";
 import { MacroLogger } from "@/components/features/MacroLogger";
 import { CharacterEvolution } from "@/components/features/CharacterEvolution";
+import { ProgressPhotosGallery } from "@/components/features/ProgressPhotosGallery";
+import { StreakShieldPanel } from "@/components/features/StreakShieldPanel";
 import { useDashboard } from "@/hooks/useDashboard";
 import type { RankTier } from "@/types/database";
 
@@ -59,6 +61,8 @@ export default function DesktopStatsPage() {
       <WeightTrendCard stats={stats} onLogged={refetch} />
       <BodyMeasurementsCard onLogged={refetch} />
       <MacroLogger onLogged={refetch} />
+      <ProgressPhotosGallery />
+      <StreakShieldPanel stats={stats} />
 
       <section>
         <h2 className="font-display text-sm uppercase tracking-[0.3em] text-cyan-500/50 mb-4">

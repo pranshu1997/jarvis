@@ -15,7 +15,11 @@ interface GameState {
   xpAnimations: XpAnimation[];
   lastLevelUp: number | null;
   lastRankUp: string | null;
+  lastPr: { exerciseName: string; weight: number | null } | null;
+  lastPhoenix: boolean;
+  lastPerfectWeek: boolean;
   undoUntil: number | null;
+  undoLabel: string | null;
   setStats: (stats: DashboardStats | null) => void;
   setLoading: (loading: boolean) => void;
   setPlatform: (platform: "desktop" | "mobile") => void;
@@ -25,7 +29,13 @@ interface GameState {
   clearLevelUp: () => void;
   triggerRankUp: (rank: string) => void;
   clearRankUp: () => void;
-  setUndoUntil: (until: number | null) => void;
+  triggerPr: (exerciseName: string, weight: number | null) => void;
+  clearPr: () => void;
+  triggerPhoenix: () => void;
+  clearPhoenix: () => void;
+  triggerPerfectWeek: () => void;
+  clearPerfectWeek: () => void;
+  setUndoUntil: (until: number | null, label?: string | null) => void;
   toggleHabit: (habitId: string) => void;
   toggleSupplement: (supplementId: string) => void;
 }
@@ -37,7 +47,11 @@ export const useGameStore = create<GameState>((set, get) => ({
   xpAnimations: [],
   lastLevelUp: null,
   lastRankUp: null,
+  lastPr: null,
+  lastPhoenix: false,
+  lastPerfectWeek: false,
   undoUntil: null,
+  undoLabel: null,
 
   setStats: (stats) => set({ stats, isLoading: false }),
   setLoading: (isLoading) => set({ isLoading }),
@@ -52,7 +66,13 @@ export const useGameStore = create<GameState>((set, get) => ({
   clearLevelUp: () => set({ lastLevelUp: null }),
   triggerRankUp: (rank: string) => set({ lastRankUp: rank }),
   clearRankUp: () => set({ lastRankUp: null }),
-  setUndoUntil: (undoUntil: number | null) => set({ undoUntil }),
+  triggerPr: (exerciseName, weight) => set({ lastPr: { exerciseName, weight } }),
+  clearPr: () => set({ lastPr: null }),
+  triggerPhoenix: () => set({ lastPhoenix: true }),
+  clearPhoenix: () => set({ lastPhoenix: false }),
+  triggerPerfectWeek: () => set({ lastPerfectWeek: true }),
+  clearPerfectWeek: () => set({ lastPerfectWeek: false }),
+  setUndoUntil: (undoUntil, label = null) => set({ undoUntil, undoLabel: label }),
 
   toggleHabit: (habitId) => {
     const { stats } = get();

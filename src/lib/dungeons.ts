@@ -51,7 +51,16 @@ export function damageDungeonBoss(
   if (cats?.length && !cats.includes(cat)) return { defeated: false, damage: 0 };
 
   const damage = BOSS_DAMAGE_PER_HABIT;
-  const nextHp = Math.max(0, dungeon.boss_hp - damage);
+  let nextHp = Math.max(0, dungeon.boss_hp - damage);
+  let phase = dungeon.phase ?? 1;
+  let title = dungeon.title;
+
+  if (phase === 1 && nextHp <= dungeon.boss_hp_max * 0.5 && nextHp > 0) {
+    phase = 2;
+    title = `${dungeon.title} — Phase II`;
+    nextHp = Math.round(dungeon.boss_hp_max * 0.5);
+  }
+
   const defeated = nextHp <= 0;
 
   if (defeated) {
@@ -65,20 +74,30 @@ export function damageDungeonBoss(
     unlocked.dungeon_clear = { unlocked_at: new Date().toISOString() };
     patchExtended(state.profile, { active_dungeon: null, achievements_unlocked: unlocked });
   } else {
+    // Transition to phase 2 when HP drops to or below 50%
+    const enteredPhaseTwo =
+      (dungeon.phase ?? 1) === 1 &&
+      nextHp <= dungeon.boss_hp_max * 0.5;
+    const nextTitle = enteredPhaseTwo
+      ? `${dungeon.title} — Phase II`
+      : dungeon.title;
+    const nextPhase = enteredPhaseTwo ? 2 : (dungeon.phase ?? 1);
     patchExtended(state.profile, {
-      active_dungeon: { ...dungeon, boss_hp: nextHp },
+      active_dungeon: { ...dungeon, boss_hp: nextHp, title: nextTitle, phase: nextPhase },
     });
   }
 
   return { defeated, damage };
 }
 
-export function ensureDungeonQuest(state: DashboardStats): void {
-  if (getActiveDungeon(state)) return;
+export function ensureDungeonQuest(state: DashboardStats): boolean {
+  if (getActiveDungeon(state)) return false;
   const dungeon = state.quests.find(
     (q) => q.quest_type === "dungeon" && q.status === "active"
   );
-  if (dungeon) spawnDungeonFromQuest(state, dungeon);
+  if (!dungeon) return false;
+  spawnDungeonFromQuest(state, dungeon);
+  return true;
 }
 
 export function createWeeklyDungeon(state: DashboardStats): void {

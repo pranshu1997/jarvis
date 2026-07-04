@@ -85,7 +85,12 @@ export interface AchievementView {
   unlocked_at: string | null;
 }
 
-export function syncAchievements(state: DashboardStats): AchievementView[] {
+export type SyncAchievementsResult = {
+  achievements: AchievementView[];
+  changed: boolean;
+};
+
+export function syncAchievements(state: DashboardStats): SyncAchievementsResult {
   const unlocked = { ...(getExtended(state.profile).achievements_unlocked ?? {}) };
   const now = new Date().toISOString();
   let changed = false;
@@ -99,7 +104,7 @@ export function syncAchievements(state: DashboardStats): AchievementView[] {
 
   if (changed) patchExtended(state.profile, { achievements_unlocked: unlocked });
 
-  return ACHIEVEMENT_CATALOG.map((def) => ({
+  const achievements = ACHIEVEMENT_CATALOG.map((def) => ({
     id: def.id,
     title: def.title,
     description: def.description,
@@ -108,9 +113,11 @@ export function syncAchievements(state: DashboardStats): AchievementView[] {
     unlocked: !!unlocked[def.id],
     unlocked_at: unlocked[def.id]?.unlocked_at ?? null,
   }));
+
+  return { achievements, changed };
 }
 
 /** Legacy panel compatibility */
 export function getAchievementsForPanel(state: DashboardStats) {
-  return syncAchievements(state);
+  return syncAchievements(state).achievements;
 }

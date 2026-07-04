@@ -5,10 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
 
-const REASONS = [
-  { id: "rest" as const, label: "Rest day" },
-  { id: "sick" as const, label: "Sick" },
-  { id: "travel" as const, label: "Travel" },
+type SkipReason = "rest" | "sick" | "travel" | "busy" | "forgot";
+
+const REASONS: { id: SkipReason; label: string; emoji: string }[] = [
+  { id: "rest", label: "Rest day", emoji: "💤" },
+  { id: "sick", label: "Sick", emoji: "🤒" },
+  { id: "travel", label: "Travel", emoji: "✈️" },
+  { id: "busy", label: "Busy", emoji: "⏰" },
+  { id: "forgot", label: "Forgot", emoji: "🧠" },
 ];
 
 export function SkipHabitDialog({
@@ -16,13 +20,15 @@ export function SkipHabitDialog({
   open,
   onClose,
   onConfirm,
+  onSnooze,
 }: {
   habitName: string;
   open: boolean;
   onClose: () => void;
-  onConfirm: (reason: "rest" | "sick" | "travel") => void;
+  onConfirm: (reason: SkipReason) => void;
+  onSnooze?: () => void;
 }) {
-  const [reason, setReason] = useState<"rest" | "sick" | "travel">("rest");
+  const [reason, setReason] = useState<SkipReason>("rest");
 
   return (
     <AnimatePresence>
@@ -48,18 +54,36 @@ export function SkipHabitDialog({
               Skip <strong className="text-cyan-200">{habitName}</strong> without
               breaking your streak. Uses 1 shield this week.
             </p>
-            <div className="flex gap-2 mt-4">
-              {REASONS.map((r) => (
+            <div className="grid grid-cols-3 gap-2 mt-4">
+              {REASONS.slice(0, 3).map((r) => (
                 <button
                   key={r.id}
                   type="button"
                   onClick={() => setReason(r.id)}
-                  className={`flex-1 py-2 rounded-lg text-xs border ${
+                  className={`flex flex-col items-center py-2 px-1 rounded-lg text-xs border gap-1 ${
                     reason === r.id
-                      ? "border-cyan-400 bg-cyan-500/15"
-                      : "border-slate-700"
+                      ? "border-cyan-400 bg-cyan-500/15 text-cyan-200"
+                      : "border-slate-700 text-cyan-100/60 hover:border-slate-600"
                   }`}
                 >
+                  <span className="text-base">{r.emoji}</span>
+                  {r.label}
+                </button>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {REASONS.slice(3).map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => setReason(r.id)}
+                  className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs border ${
+                    reason === r.id
+                      ? "border-cyan-400 bg-cyan-500/15 text-cyan-200"
+                      : "border-slate-700 text-cyan-100/60 hover:border-slate-600"
+                  }`}
+                >
+                  <span>{r.emoji}</span>
                   {r.label}
                 </button>
               ))}
@@ -68,6 +92,11 @@ export function SkipHabitDialog({
               <Button variant="outline" className="flex-1" onClick={onClose}>
                 Cancel
               </Button>
+              {onSnooze && (
+                <Button variant="outline" className="flex-1" onClick={onSnooze}>
+                  Snooze
+                </Button>
+              )}
               <Button
                 variant="hologram"
                 className="flex-1"

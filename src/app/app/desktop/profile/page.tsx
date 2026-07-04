@@ -5,6 +5,10 @@ import { RankBadge } from "@/components/shared/RankBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGameStore } from "@/stores/game-store";
 import { formatNumber } from "@/lib/utils";
+import { EvolutionGoalPanel } from "@/components/features/EvolutionGoalPanel";
+import { AppOpenStreakBadge } from "@/components/features/AppOpenStreakBadge";
+import { ProfileTitlePicker } from "@/components/features/ProfileTitlePicker";
+import { ResilienceBadge } from "@/components/features/ResilienceBadge";
 export default function DesktopProfilePage() {
   const stats = useGameStore((s) => s.stats);
   if (!stats) return null;
@@ -12,6 +16,12 @@ export default function DesktopProfilePage() {
   return (
     <div className="p-8 space-y-8 max-w-4xl">
       <PlayerHeader profile={stats.profile} />
+      <div className="flex items-center gap-2">
+        <AppOpenStreakBadge />
+        <ResilienceBadge />
+      </div>
+      <ProfileTitlePicker />
+      <EvolutionGoalPanel />
 
       <div className="grid grid-cols-2 gap-6">
         <Card glow>

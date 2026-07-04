@@ -4,9 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import { useGameStore } from "@/stores/game-store";
 import { useToastStore } from "@/stores/toast-store";
 import { hapticSuccess, playSound, isSoundEnabled } from "@/lib/feedback";
+import { hapticCombo } from "@/lib/haptics";
 import { jarvisFetch } from "@/lib/api-client";
 import { rankOrder } from "@/lib/player-settings";
 import type { DashboardStats, RankTier } from "@/types/database";
+
+const DASHBOARD_CACHE_KEY = "jarvis_dashboard_cache_v1";
 
 interface ActionResult {
   xpEarned?: number;
@@ -17,6 +20,8 @@ interface ActionResult {
   newRank?: RankTier;
   categoryComplete?: string;
   perfectDay?: boolean;
+  isPerfectWeek?: boolean;
+  phoenixBonus?: number;
   comboCount?: number;
 }
 
@@ -25,7 +30,7 @@ export function useDashboard() {
   const [categoryCelebration, setCategoryCelebration] = useState<string | null>(null);
 
   const fetchDashboard = useCallback(async () => {
-    setLoading(true);
+    if (!useGameStore.getState().stats) setLoading(true);
     try {
       const res = await jarvisFetch("/api/dashboard");
       if (!res.ok) {
@@ -36,7 +41,13 @@ export function useDashboard() {
         );
       }
       const data: DashboardStats = await res.json();
+      try {
+        sessionStorage.setItem(DASHBOARD_CACHE_KEY, JSON.stringify(data));
+      } catch {
+        /* ignore quota */
+      }
       setStats(data);
+      void jarvisFetch("/api/backup/run-if-due", { method: "POST" });
     } catch (e) {
       if (!(e instanceof Error && e.message === "Unauthorized")) {
         useToastStore.getState().show("Failed to sync data", "error");
@@ -46,8 +57,16 @@ export function useDashboard() {
   }, [setStats, setLoading]);
 
   useEffect(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
+    try {
+      const raw = sessionStorage.getItem(DASHBOARD_CACHE_KEY);
+      if (raw) {
+        setStats(JSON.parse(raw) as DashboardStats);
+      }
+    } catch {
+      /* ignore corrupt cache */
+    }
+    void fetchDashboard();
+  }, [fetchDashboard, setStats]);
 
   const handleActionResult = useCallback(
     (result: ActionResult, x = 50, y = 40) => {
@@ -100,8 +119,17 @@ export function useDashboard() {
         playSound("quest", sound);
         useToastStore.getState().show("Perfect Day achieved!", "celebration");
       }
-      if ((result as { phoenixBonus?: number }).phoenixBonus) {
+      if (result.isPerfectWeek) {
+        playSound("levelup", sound);
+        useGameStore.getState().triggerPerfectWeek();
+        useToastStore.getState().show("Perfect Week unlocked!", "celebration");
+      }
+      if (result.phoenixBonus) {
+        useGameStore.getState().triggerPhoenix();
         useToastStore.getState().show("Phoenix Rising — streak restored!", "celebration");
+      }
+      if (result.comboCount && result.comboCount >= 3 && result.comboCount % 5 === 0) {
+        hapticCombo();
       }
     },
     []
@@ -142,7 +170,7 @@ export function useDashboard() {
   );
 
   const skipHabit = useCallback(
-    async (habitId: string, reason: "rest" | "sick" | "travel") => {
+    async (habitId: string, reason: "rest" | "sick" | "travel" | "busy" | "forgot") => {
       try {
         const res = await jarvisFetch("/api/habits/skip", {
           method: "POST",

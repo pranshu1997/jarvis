@@ -1,6 +1,8 @@
 "use client";
 
 import { QuestPanel } from "@/components/features/QuestPanel";
+import { PinQuestMobile } from "@/components/features/PinQuestMobile";
+import { QuestKanban } from "@/components/features/QuestKanban";
 import { useGameStore } from "@/stores/game-store";
 
 export default function MobileQuestsPage() {
@@ -12,6 +14,8 @@ export default function MobileQuestsPage() {
       <h2 className="font-display text-xl font-bold text-cyan-100">
         Active Quests
       </h2>
+      <PinQuestMobile quests={stats.quests} />
+      <QuestKanban quests={stats.quests} />
       <QuestPanel quests={stats.quests} />
     </div>
   );

@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { PlayerHeader } from "@/components/features/PlayerHeader";
+import { ProfileCustomizer } from "@/components/features/ProfileCustomizer";
+import { ProfileTitlePicker } from "@/components/features/ProfileTitlePicker";
+import { EvolutionGoalPanel } from "@/components/features/EvolutionGoalPanel";
+import { ResilienceBadge } from "@/components/features/ResilienceBadge";
 import { useGameStore } from "@/stores/game-store";
 import { Settings, Monitor } from "lucide-react";
 
@@ -12,6 +16,10 @@ export default function MobileProfilePage() {
   return (
     <div className="space-y-6 pt-4">
       <PlayerHeader profile={stats.profile} variant="mobile" />
+      <ResilienceBadge />
+      <ProfileTitlePicker />
+      <EvolutionGoalPanel />
+      <ProfileCustomizer />
       <div className="space-y-2">
         <Link
           href="/app/desktop/dashboard"

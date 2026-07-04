@@ -18,6 +18,10 @@ import { damageDungeonBoss } from "@/lib/dungeons";
 import { getPhoenixWindow, applyPhoenixOnComplete } from "@/lib/phoenix";
 import { addShadowCoins } from "@/lib/player-settings-extended";
 import { updateWeeklyGeneratedQuests } from "@/lib/weekly-quest-gen";
+import { getDoubleXpMultiplier } from "@/lib/double-xp";
+import { getSkillMultiplier } from "@/lib/monarch-skills";
+import { getCoinBonusMultiplier } from "@/lib/rank-perks";
+import { advanceBossRush } from "@/lib/boss-rush";
 
 export function getHabitCategorySlug(habit: Habit): string {
   return (
@@ -223,6 +227,7 @@ export interface CompleteHabitResult {
   newRank: RankTier;
   categoryComplete?: string;
   perfectDay?: boolean;
+  isPerfectWeek?: boolean;
   comboCount?: number;
   multipliers?: ReturnType<typeof calculateXp>["multipliers"];
 }
@@ -237,7 +242,7 @@ function saveUndoSnapshot(
 export function skipHabitInState(
   state: DashboardStats,
   habitId: string,
-  reason: "rest" | "sick" | "travel"
+  reason: "rest" | "sick" | "travel" | "busy" | "forgot"
 ): { success: boolean; shieldsLeft: number; error?: string } {
   const habit = state.habits.find((h) => h.id === habitId);
   if (!habit) return { success: false, shieldsLeft: 0, error: "Habit not found" };
@@ -351,7 +356,9 @@ export function completeHabitInState(
     isPerfectWeek: isPerfectWeekActive(state),
   });
 
-  const totalXpGain = xp.finalXp + phoenixBonus;
+  const skillBoost = getSkillMultiplier(state, "xp_boost");
+  const doubleXp = getDoubleXpMultiplier();
+  const totalXpGain = Math.round((xp.finalXp + phoenixBonus) * skillBoost * doubleXp);
 
   habit.total_xp += totalXpGain;
   habit.level = levelFromXp(habit.total_xp);
@@ -383,8 +390,10 @@ export function completeHabitInState(
   }
 
   logHabitToCalendar(state, habitId, totalXpGain);
-  addShadowCoins(state, Math.max(1, Math.floor(totalXpGain / 10)), habit.name);
-  damageDungeonBoss(state, habitId);
+  const coinMult = getCoinBonusMultiplier(state) * getSkillMultiplier(state, "coin_boost");
+  addShadowCoins(state, Math.max(1, Math.floor((totalXpGain / 10) * coinMult)), habit.name);
+  const { defeated } = damageDungeonBoss(state, habitId);
+  if (defeated) advanceBossRush(state);
 
   if (habit.slug === "sports_habit" && state.sports?.length) {
     const overall = state.sports.find((s) => s.slug === "overall");
@@ -445,6 +454,7 @@ export function completeHabitInState(
     newRank: state.profile.rank,
     categoryComplete,
     perfectDay: state.dailyCompletion?.perfect_day,
+    isPerfectWeek: isPerfectWeekActive(state),
     comboCount,
     multipliers: xp.multipliers,
   };

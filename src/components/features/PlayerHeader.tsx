@@ -5,6 +5,7 @@ import { RankBadge } from "@/components/shared/RankBadge";
 import { XpBar } from "@/components/effects/XpBar";
 import { xpProgressInLevel } from "@/lib/xp-engine";
 import { formatNumber } from "@/lib/utils";
+import { getExtended } from "@/lib/player-settings-extended";
 import type { Profile } from "@/types/database";
 
 interface PlayerHeaderProps {
@@ -14,6 +15,7 @@ interface PlayerHeaderProps {
 
 export function PlayerHeader({ profile, variant = "desktop" }: PlayerHeaderProps) {
   const xp = xpProgressInLevel(profile.total_xp, profile.player_level);
+  const title = getExtended(profile).profile_title;
 
   if (variant === "mobile") {
     return (
@@ -21,7 +23,7 @@ export function PlayerHeader({ profile, variant = "desktop" }: PlayerHeaderProps
         <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-[10px] uppercase tracking-[0.3em] text-cyan-500/50">
-              Hunter Status
+              {title ?? "Hunter Status"}
             </p>
             <h2 className="font-display text-xl font-bold text-cyan-100">
               {profile.display_name ?? "Hunter"}
@@ -62,7 +64,7 @@ export function PlayerHeader({ profile, variant = "desktop" }: PlayerHeaderProps
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.4em] text-cyan-500/50 mb-2">
-            System Status — Online
+            {title ?? "System Status — Online"}
           </p>
           <h2 className="font-display text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 to-blue-400">
             {profile.display_name ?? "Hunter"}

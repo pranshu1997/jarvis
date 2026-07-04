@@ -2,12 +2,17 @@ import { readFile } from "fs/promises";
 import path from "path";
 import os from "os";
 import { randomUUID } from "crypto";
-import { hashPassword } from "@/lib/auth/password";
 import { createInitialGameState } from "@/lib/local/game-state";
 import { findUserByUsername, saveUser } from "@/lib/local/store";
 import type { LocalUserRecord } from "@/lib/local/types";
 
-const NEXUS_AUTH_FILE = path.join(os.homedir(), "code", "nexus", "data", "auth_users.json");
+const NEXUS_AUTH_FILE = path.join(
+  os.homedir(),
+  "code",
+  "nexus",
+  "data",
+  "auth_users.json"
+);
 
 export async function ensureLocalUserFromNexus(
   username: string
@@ -17,7 +22,8 @@ export async function ensureLocalUserFromNexus(
     return { ok: false, error: "Missing username." };
   }
 
-  if (await findUserByUsername(normalized)) {
+  const existing = await findUserByUsername(normalized);
+  if (existing) {
     return { ok: true };
   }
 
@@ -28,7 +34,9 @@ export async function ensureLocalUserFromNexus(
     return { ok: false, error: "Nexus auth store not found." };
   }
 
-  let data: { users?: Array<{ username: string }> };
+  let data: {
+    users?: Array<{ username: string; salt_b64?: string; hash_b64?: string }>;
+  };
   try {
     data = JSON.parse(raw);
   } catch {
@@ -38,20 +46,24 @@ export async function ensureLocalUserFromNexus(
   const row = data.users?.find(
     (u) => u.username.trim().toLowerCase() === normalized
   );
-  if (!row) {
-    return { ok: false, error: `User \`${normalized}\` is not registered in Nexus.` };
+  if (!row?.salt_b64 || !row?.hash_b64) {
+    return {
+      ok: false,
+      error: `User \`${normalized}\` is not registered in Nexus.`,
+    };
   }
 
   const id = randomUUID();
   const displayName = normalized;
-  const password_hash = await hashPassword(randomUUID());
   const game_state = createInitialGameState(id, displayName);
 
   const user: LocalUserRecord = {
     id,
     username: normalized,
     display_name: displayName,
-    password_hash,
+    password_hash: null,
+    salt_b64: row.salt_b64,
+    hash_b64: row.hash_b64,
     webauthn_credentials: [],
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { jarvisFetch } from "@/lib/api-client";
 import { useToastStore } from "@/stores/toast-store";
 import { useDashboard } from "@/hooks/useDashboard";
+import { MonarchSkillTree } from "@/components/features/MonarchSkillTree";
+import { RankPerksPanel } from "@/components/features/RankPerksPanel";
+import { CoinHistoryPanel } from "@/components/features/CoinHistoryPanel";
 
 interface ShopItem {
   id: string;
@@ -52,6 +55,7 @@ export default function ShadowShopPage() {
         <h1 className="font-display text-3xl font-bold text-cyan-100">Shadow Shop</h1>
         <p className="text-cyan-500/50 mt-1 font-mono">{coins} Shadow Coins</p>
       </header>
+      <CoinHistoryPanel />
       <div className="space-y-3">
         {items.map((item) => (
           <Card key={item.id} glow>
@@ -74,6 +78,15 @@ export default function ShadowShopPage() {
           </Card>
         ))}
       </div>
+
+      <Card className="mt-8">
+        <CardHeader><CardTitle className="text-sm">Rank Perks</CardTitle></CardHeader>
+        <CardContent><RankPerksPanel /></CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle className="text-sm">Monarch Skill Tree</CardTitle></CardHeader>
+        <CardContent><MonarchSkillTree /></CardContent>
+      </Card>
     </div>
   );
 }
